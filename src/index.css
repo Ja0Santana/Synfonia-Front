@@ -1,0 +1,447 @@
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-brand: var(--brand-color, #8b5cf6);
+  --color-dark: var(--bg-main);
+  --color-zinc-850: var(--bg-card);
+  --color-zinc-900: var(--bg-side);
+  
+  /* Mapeamento de texto adaptativo */
+  --color-main: var(--text-main);
+  --color-dim: var(--text-dim);
+  --color-song: var(--user-song-color, var(--text-main));
+  --color-brand-contrast: var(--color-brand-contrast, #ffffff);
+  --color-brand-legible: var(--color-brand-legible, var(--brand-color));
+  
+  --font-sans: "Inter", sans-serif;
+  
+  --radius-custom: 8px;
+}
+
+:root {
+  color-scheme: dark;
+  --bg-main: #09090b;
+  --bg-side: #121214;
+  --bg-card: #18181b;
+  --text-main: #f4f4f5;
+  --text-dim: #a1a1aa;
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --brand-color: var(--color-brand, #8b5cf6);
+  --brand-rgb: var(--color-brand-rgb, 139, 92, 246);
+
+  /* Lógica de Acessibilidade */
+  --font-size-base: 16px;
+  --font-size-scale: calc(var(--font-size-level, 1) - 1);
+  
+  /* Desktop: escala total */
+  font-size: calc(var(--font-size-base) + (var(--font-size-scale) * 2px));
+}
+
+@media (max-width: 768px) {
+  :root {
+    /* Mobile: escala permitindo diminuir (0.75x) ou aumentar (até 1.25x) */
+    --font-size-limit: clamp(-1, var(--font-size-scale), 1.5); 
+    font-size: calc(var(--font-size-base) + (var(--font-size-limit) * 1.5px));
+  }
+}
+
+/* Reduzir Movimento */
+[data-reduce-motion="true"] {
+  --animate-duration: 0ms !important;
+}
+
+[data-reduce-motion="true"] * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+[data-theme='oled'] {
+  color-scheme: dark;
+  --bg-main: #000000;
+  --bg-side: #09090b;
+  --bg-card: #121214;
+  --text-main: #ffffff;
+  --text-dim: #71717a;
+  --border-subtle: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --bg-main: #ffffff;
+  --bg-side: #f5f3ff;
+  --bg-card: #fdfaff;
+  --text-main: #1e1b4b; /* Indigo 950 para contraste máximo */
+  --text-dim: #4338ca;  /* Indigo 700 para texto secundário legível */
+  --border-subtle: rgba(139, 92, 246, 0.12);
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  /* Transição padrão apenas para interações rápidas, não interfere no View Transition */
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.glass-panel {
+  background: var(--bg-side);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
+}
+
+.shadow-brand-text {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.ultra-round-picker {
+  border-radius: 9999px !important;
+  clip-path: circle(50% at 50% 50%);
+  -webkit-clip-path: circle(50% at 50% 50%);
+}
+
+.active-nav-item {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--brand-color, #8b5cf6) 15%, transparent) 0%, transparent 100%);
+  border-left: 3px solid var(--brand-color, #8b5cf6);
+}
+
+/* Fix active-nav-item implementation */
+.active-nav-item-container {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--brand-color) 15%, transparent) 0%, transparent 100%);
+  border-left: 3px solid var(--brand-color);
+}
+
+button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  /* Removido o filter: brightness(1.35) global pois quebra a visibilidade no modo claro */
+  transform: translateY(-1px);
+}
+
+
+.auth-tab {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: rgba(161, 161, 170, 0.8);
+  z-index: 1;
+  background: transparent;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+.auth-tab:first-child {
+  border-top-left-radius: 20px;
+}
+
+.auth-tab:last-child {
+  border-top-right-radius: 20px;
+}
+
+.auth-tab[data-active="true"] {
+  color: #ffffff;
+  z-index: 5;
+}
+
+.auth-window {
+  position: relative;
+  z-index: 10;
+  margin-top: -1px;
+  background-color: var(--color-dark);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0 0 20px 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transition: border-radius 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pulseBeat {
+  0%, 100% {
+    transform: scale(1);
+    text-shadow: 0 0 0 rgba(139, 92, 246, 0), 0 0 0 rgba(139, 92, 246, 0);
+  }
+  20% {
+    transform: scale(1.04);
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.25), 0 0 20px rgba(139, 92, 246, 0.18);
+  }
+  40% {
+    transform: scale(1);
+    text-shadow: 0 0 0 rgba(139, 92, 246, 0), 0 0 0 rgba(139, 92, 246, 0);
+  }
+  60% {
+    transform: scale(1.06);
+    text-shadow: 0 0 14px rgba(139, 92, 246, 0.35), 0 0 28px rgba(139, 92, 246, 0.22);
+  }
+  80% {
+    transform: scale(1.01);
+    text-shadow: 0 0 6px rgba(139, 92, 246, 0.18), 0 0 12px rgba(139, 92, 246, 0.12);
+  }
+}
+
+@keyframes waveBeat {
+  0%, 100% {
+    transform: scaleY(0.55);
+    opacity: 0.7;
+  }
+  20% {
+    transform: scaleY(1.15);
+    opacity: 1;
+  }
+  40% {
+    transform: scaleY(0.75);
+    opacity: 0.82;
+  }
+  60% {
+    transform: scaleY(1.35);
+    opacity: 1;
+  }
+  80% {
+    transform: scaleY(0.9);
+    opacity: 0.9;
+  }
+}
+
+/* Animação de Expansão de Tema Nativa (View Transitions API) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+  clip-path: circle(0px at var(--x) var(--y));
+  animation: theme-reveal 750ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0px at var(--x) var(--y));
+  }
+  to {
+    clip-path: circle(var(--end-radius) at var(--x) var(--y));
+  }
+}
+
+/* Manter o Logo em movimento (ou pelo menos sem o congelamento do clip-path root) */
+::view-transition-group(site-logo-sidebar),
+::view-transition-group(site-logo-header) {
+  animation-duration: 0s;
+  z-index: 1000;
+}
+
+::view-transition-old(site-logo-sidebar),
+::view-transition-new(site-logo-sidebar),
+::view-transition-old(site-logo-header),
+::view-transition-new(site-logo-header) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Desabilita transições para performance extrema durante escolha de cores */
+.no-transitions * {
+  transition: none !important;
+}
+
+/* Estilos para Visualização em Lista (List View) */
+.music-list-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.music-list-item:hover {
+  background: rgba(var(--color-brand-rgb), 0.05);
+  border-color: var(--color-brand);
+}
+
+.music-list-item .item-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.music-list-item .item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.music-list-item .item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Estilos para Playlists em Lista */
+.playlist-list-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  gap: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.playlist-list-item:hover {
+  background: rgba(var(--color-brand-rgb), 0.05);
+  border-color: var(--color-brand);
+  transform: translateX(4px);
+}
+
+.playlist-list-item .item-image {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.playlist-list-item .item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.playlist-list-item .item-actions {
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.playlist-list-item:hover .item-actions {
+  opacity: 1;
+}
+
+/* Custom Scrollbar Premium */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(161, 161, 170, 0.1);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--brand-color) 30%, transparent);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-color);
+}
+
+.music-badge-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.5rem;
+  height: 16px;
+  background: rgba(var(--text-main), 0.05);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.music-title-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.music-title-wrap .title-text {
+  width: 100%;
+  text-align: center;
+  /* Padding simétrico para garantir que o texto fique centralizado de verdade, 
+     reservando espaço para o badge na direita */
+  padding: 0 60px; 
+}
+
+.music-title-wrap .music-badge-preview {
+  position: absolute;
+  right: 0;
+}
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  width: 100%;
+}
+
+.marquee-content {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee-scroll 10s linear infinite;
+  padding-left: 20px; /* Espaço para o loop parecer natural */
+}
+
+/* Duplicamos o conteúdo no pseudo-elemento para um loop infinito suave */
+.marquee-content::after {
+  content: attr(data-text);
+  padding-left: 50px;
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Versão que só anima no hover ou se for forçado */
+.animate-marquee {
+  animation: marquee-scroll 10s linear infinite;
+}
+
+.pause-marquee {
+  animation-play-state: paused;
+}
