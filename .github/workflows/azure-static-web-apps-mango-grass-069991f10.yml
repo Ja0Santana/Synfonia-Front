@@ -34,7 +34,7 @@ jobs:
           ###### End of Repository/Build Configurations ######
         env:
           VITE_API_URL: "https://synfonia-h5drdfb5etbab5cn.brazilsouth-01.azurewebsites.net/api/v1"
-          VITE_SPOTIFY_REDIRECT_URI: "https://mango-grass-069991f10.4.azurestaticapps.net/callback"
+          VITE_SPOTIFY_REDIRECT_URI: "https://synfonia.me/callback"
           VITE_SPOTIFY_CLIENT_ID: "696c149d5c5a451e9411d7fce510793c"
 
   close_pull_request_job:
