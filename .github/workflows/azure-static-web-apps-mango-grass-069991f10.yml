@@ -32,10 +32,7 @@ jobs:
           api_location: "" # Api source code path - optional
           output_location: "dist" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
-        env:
-          VITE_API_URL: "https://synfonia-h5drdfb5etbab5cn.brazilsouth-01.azurewebsites.net/api/v1"
-          VITE_SPOTIFY_REDIRECT_URI: "https://synfonia.me/callback"
-          VITE_SPOTIFY_CLIENT_ID: "696c149d5c5a451e9411d7fce510793c"
+
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
