@@ -4,12 +4,10 @@ on:
   push:
     branches:
       - main
-      - develop
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
-      - develop
 
 jobs:
   build_and_deploy_job:
@@ -35,8 +33,8 @@ jobs:
           output_location: "dist" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
         env:
-          VITE_API_URL: ${{ github.ref == 'refs/heads/develop' && secrets.VITE_API_URL_DEV || secrets.VITE_API_URL }}
-          VITE_SPOTIFY_REDIRECT_URI: ${{ github.ref == 'refs/heads/develop' && secrets.VITE_SPOTIFY_REDIRECT_URI_DEV || secrets.VITE_SPOTIFY_REDIRECT_URI }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_SPOTIFY_REDIRECT_URI: ${{ secrets.VITE_SPOTIFY_REDIRECT_URI }}
           VITE_SPOTIFY_CLIENT_ID: ${{ secrets.VITE_SPOTIFY_CLIENT_ID }}
 
   close_pull_request_job:

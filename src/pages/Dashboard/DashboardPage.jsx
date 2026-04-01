@@ -7,7 +7,8 @@ import { useAudio } from '../../hooks/useAudio';
 import { useTheme } from '../../context/ThemeContext';
 
 const DashboardPage = () => {
-  const { playTrack, currentTrack, isPlaying, addToQueue, playNext, toggleFavorite, favoriteIds } = useAudio();
+  const { playTrack, currentTrack, isPlaying, addToQueue, playNext } = useAudio();
+  const [addedIds, setAddedIds] = useState(new Set());
   const { viewMode, toggleViewMode } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState('all'); // all, title, artist, album
@@ -180,6 +181,39 @@ const DashboardPage = () => {
       } finally {
         setLoading(false);
       }
+    }
+  };
+
+  const saveMusic = async (track) => {
+    if (authService.isGuest()) {
+      setMessage({ type: 'error', text: 'Crie uma conta para salvar músicas na sua coleção!' });
+      return;
+    }
+
+    try {
+      const musicData = {
+        trackId: String(track.trackId || track.id),
+        nome: track.nome,
+        artista: track.artista,
+        album: track.album || '',
+        capaUrl: track.capaUrl,
+        previewUrl: track.previewUrl || '',
+        source: track.source || (track.isSpotify ? 'SPOTIFY' : 'ITUNES')
+      };
+
+      await musicService.saveToCollection(user.id, musicData);
+      
+      setAddedIds(prev => {
+        const next = new Set(prev);
+        next.add(track.trackId || track.id);
+        return next;
+      });
+      
+      setMessage({ type: 'success', text: 'Música salva na sua coleção!' });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err) {
+      console.error('Save error:', err);
+      setMessage({ type: 'error', text: 'Erro ao salvar música.' });
     }
   };
 
@@ -418,15 +452,15 @@ const DashboardPage = () => {
                       </p>
 
                       <button
-                        onClick={() => toggleFavorite(music)}
+                        onClick={() => saveMusic(music)}
                         className={`p-2 rounded-full transition-all shrink-0 ${
-                          favoriteIds.has(music.trackId || music.id) 
-                            ? 'bg-brand text-brand-contrast' 
+                          addedIds.has(music.trackId || music.id) 
+                            ? 'bg-green-500 text-white shadow-lg shadow-green-500/20 scale-110' 
                             : 'hover:bg-brand/20 text-brand'
                         }`}
-                        title={favoriteIds.has(music.trackId || music.id) ? "Remover das curtidas" : "Curtir Música"}
+                        title={addedIds.has(music.trackId || music.id) ? "Salva na coleção" : "Salvar na Coleção"}
                       >
-                        <Heart size={18} fill={favoriteIds.has(music.trackId || music.id) ? "currentColor" : "none"} />
+                        {addedIds.has(music.trackId || music.id) ? <Check size={18} /> : <Heart size={18} />}
                       </button>
                     </div>
                   </div>
@@ -499,14 +533,15 @@ const DashboardPage = () => {
                           <ListMusic size={18} />
                         </button>
                         <button
-                          onClick={() => toggleFavorite(music)}
+                          onClick={() => saveMusic(music)}
                           className={`p-2 rounded-full transition-all ${
-                            favoriteIds.has(music.trackId || music.id) 
-                              ? 'text-brand' 
+                            addedIds.has(music.trackId || music.id) 
+                              ? 'text-green-500' 
                               : 'text-dim hover:text-brand hover:bg-brand/10'
                           }`}
+                          title={addedIds.has(music.trackId || music.id) ? "Salva na coleção" : "Salvar na Coleção"}
                         >
-                          <Heart size={18} fill={favoriteIds.has(music.trackId || music.id) ? "currentColor" : "none"} />
+                          {addedIds.has(music.trackId || music.id) ? <Check size={18} /> : <Heart size={18} />}
                         </button>
                       </div>
                     </div>
