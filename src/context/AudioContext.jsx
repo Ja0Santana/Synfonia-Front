@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { authService } from '../services/authService';
 import { musicService } from '../services/musicService';
 import { spotifyService } from '../services/spotifyService';
