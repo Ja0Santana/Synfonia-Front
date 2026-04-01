@@ -57,6 +57,8 @@ export const AudioProvider = ({ children }) => {
   const [queue, setQueue] = useState([]);
   const [queueIndex, setQueueIndex] = useState(-1);
   const [favoriteIds, setFavoriteIds] = useState(new Set());
+  const [favorites, setFavorites] = useState([]);
+  const [isFavoritesLoading, setIsFavoritesLoading] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [playbackMode, setPlaybackMode] = useState('NATURAL');
   const [isSpotifySyncEnabled, setIsSpotifySyncEnabled] = useState(() => {
@@ -468,12 +470,18 @@ export const AudioProvider = ({ children }) => {
     const user = authService.getCurrentUser();
     if (!user || authService.isGuest()) return;
     
+    setIsFavoritesLoading(true);
     try {
       const collection = await musicService.getCollection(user.id);
-      const ids = new Set(collection.map(item => item.music?.trackId || item.music?.id).filter(Boolean));
+      const data = Array.isArray(collection) ? collection : [];
+      
+      setFavorites(data);
+      const ids = new Set(data.map(item => item.music?.trackId || item.music?.id).filter(Boolean));
       setFavoriteIds(ids);
     } catch (err) {
       console.error("Error fetching favorites:", err);
+    } finally {
+      setIsFavoritesLoading(false);
     }
   }, []);
 
@@ -498,6 +506,7 @@ export const AudioProvider = ({ children }) => {
           next.delete(trackId);
           return next;
         });
+        setFavorites(prev => prev.filter(item => (item.music?.trackId || item.music?.id) !== trackId));
       } else {
         const musicData = {
           trackId: String(trackId),
@@ -506,9 +515,10 @@ export const AudioProvider = ({ children }) => {
           album: track.album || '',
           capaUrl: track.capaUrl,
           previewUrl: track.previewUrl || '',
-          source: track.source || (track.isSpotify ? 'SPOTIFY' : 'ITUNES')
+          source: track.source || (track.isSpotify ? 'SPOTIFY' : 'ITUNES'),
+          imported: false // Curtida manual do site
         };
-        await musicService.saveToCollection(user.id, musicData);
+        const savedItem = await musicService.saveToCollection(user.id, musicData);
 
         // Sincronizar com Spotify se habilitado
         if (isSpotifySyncEnabledRef.current && spotifyToken && (track.isSpotify || track.source === 'SPOTIFY' || track.trackId)) {
@@ -520,11 +530,12 @@ export const AudioProvider = ({ children }) => {
           next.add(trackId);
           return next;
         });
+        setFavorites(prev => [savedItem, ...prev]);
       }
     } catch (err) {
       console.error("Error toggling favorite:", err);
     }
-  }, [favoriteIds]);
+  }, [favoriteIds, spotifyToken]);
 
   const importSpotify = useCallback(async () => {
     const user = authService.getCurrentUser();
@@ -566,7 +577,8 @@ export const AudioProvider = ({ children }) => {
               album: track.album.name,
               capaUrl: track.album.images[0]?.url,
               previewUrl: track.preview_url || '',
-              source: 'SPOTIFY'
+              source: 'SPOTIFY',
+              imported: true // Marcado como importado via sincronia
             };
             await musicService.saveToCollection(user.id, musicData);
             existingIds.add(track.id);
@@ -600,6 +612,18 @@ export const AudioProvider = ({ children }) => {
       setTimeout(() => setSyncStatus({ total: 0, current: 0 }), 5000);
     }
   }, [spotifyToken, isSyncing, fetchFavorites]);
+
+  // Expor no contexto
+  const contextValue = useMemo(() => ({
+    // ... existindo
+    favorites,
+    isFavoritesLoading,
+    favoriteIds,
+    fetchFavorites,
+    toggleFavorite,
+    importSpotify,
+    // ...
+  }), [favorites, isFavoritesLoading, favoriteIds, fetchFavorites, toggleFavorite, importSpotify]);
 
   useEffect(() => {
     fetchFavorites();
@@ -1390,6 +1414,8 @@ export const AudioProvider = ({ children }) => {
       skipNext,
       skipPrevious,
       favoriteIds,
+      favorites,
+      isFavoritesLoading,
       toggleFavorite,
       refreshFavorites: fetchFavorites,
       isAutoplayEnabled,
